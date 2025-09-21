@@ -1,0 +1,42 @@
+{
+  "name": "microsoft-docs-scraper",
+  "version": "1.0.0",
+  "description": "Print-view Markdown scraper for Microsoft Learn (TypeScript + Playwright)",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "ms-learn-scraper": "dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsup src/cli.ts --format esm --dts --clean",
+    "lint": "tsc --noEmit && biome lint .",
+    "fmt": "biome format --write .",
+    "check": "pnpm run lint && tsc --noEmit && pnpm run build",
+    "test": "jest --passWithNoTests",
+    "test:int": "INTEGRATION=1 jest tests/integration.print.test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.15.1",
+  "dependencies": {
+    "crawlee": "^3.10.0",
+    "playwright": "^1.55.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2",
+    "node-html-parser": "^6.1.12",
+    "commander": "^12.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@swc/jest": "^0.2.36",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^24.5.2",
+    "jest": "^29.7.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

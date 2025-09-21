@@ -1,0 +1,41 @@
+name: Scrape
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Lint/build/test
+        run: pnpm run check && pnpm test
+      - name: Run scraper
+        env:
+          SEED: ${{ secrets.SEED_URL }}
+          ALLOW: ${{ secrets.ALLOW_PREFIX }}
+          OUT: docs
+          CONCURRENCY: 6
+        run: node dist/cli.js
+      - name: Commit docs
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/
+          git commit -m "Update scraped docs" || echo "No changes"
+          git push || true
+
+

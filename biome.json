@@ -1,0 +1,40 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "include": [
+      "src/**",
+      "tests/**",
+      "jest.config.js",
+      "tsconfig.json",
+      "package.json",
+      ".github/workflows/**"
+    ],
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".test-docs/**",
+      ".int-docs/**",
+      "**/.int-docs/**",
+      "**/.test-docs/**",
+      ".git/**",
+      "**/.pnpm-store/**",
+      "/nix/**",
+      "/nix/store/**"
+    ],
+    "maxSize": 600000
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true
+  }
+}
+
+
