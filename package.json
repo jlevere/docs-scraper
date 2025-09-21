@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsup src/cli.ts --format esm --dts --clean",
+    "scrape": "node dist/cli.js",
+    "dev:scrape": "tsx src/cli.ts",
     "lint": "tsc --noEmit && biome lint .",
     "fmt": "biome format --write .",
     "check": "pnpm run lint && tsc --noEmit && pnpm run build",

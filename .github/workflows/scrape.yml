@@ -1,41 +1,60 @@
-name: Scrape
+name: Scrape Microsoft Learn
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 3 * * *"
+    inputs:
+      seed:
+        description: Seed URL to start from
+        required: true
+        type: string
+      allow:
+        description: URL prefix to allow
+        required: true
+        type: string
+      out:
+        description: Output directory
+        required: false
+        default: docs
+        type: string
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - name: Install deps
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Lint/build/test
-        run: pnpm run check && pnpm test
+
+      - name: Install Playwright browsers
+        uses: microsoft/playwright-github-action@v1
+
+      - name: Build
+        run: pnpm build
+
       - name: Run scraper
-        env:
-          SEED: ${{ secrets.SEED_URL }}
-          ALLOW: ${{ secrets.ALLOW_PREFIX }}
-          OUT: docs
-          CONCURRENCY: 6
-        run: node dist/cli.js
-      - name: Commit docs
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add docs/
-          git commit -m "Update scraped docs" || echo "No changes"
-          git push || true
+        run: node dist/cli.js --seed "${{ inputs.seed }}" --allow "${{ inputs.allow }}" --out "${{ inputs.out }}"
+
+      - name: Upload scraped docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: ${{ inputs.out }}
+
+        
 
 
