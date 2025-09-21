@@ -5,7 +5,7 @@ import { gfm } from "turndown-plugin-gfm";
 import { parse } from "node-html-parser";
 import type { ConvertResult, ScrapeConfig } from "./types";
 import { rewriteHref, urlToMdPath } from "./paths";
-import { deriveStableFilename, downloadBinary, ensureDir } from "./images";
+import { ensureDir } from "./images";
 
 function createTurndown(): TurndownService {
   const service = new TurndownService({
@@ -59,9 +59,7 @@ export async function convertHtmlToMarkdown(
 
   // Prepare output locations
   const mdAbsPath = urlToMdPath(config.outDir, currentUrl);
-  const mediaDir = path.join(config.outDir, "media");
   await ensureDir(path.dirname(mdAbsPath));
-  await ensureDir(mediaDir);
 
   // Image handling and link rewriting
   const discoveredInternal = new Set<string>();
@@ -75,13 +73,8 @@ export async function convertHtmlToMarkdown(
     } catch {
       continue;
     }
-    const filename = deriveStableFilename(abs.toString());
-    const imgAbsPath = path.join(mediaDir, filename);
-    const relFromMd = path.relative(path.dirname(mdAbsPath), imgAbsPath).replace(/\\/g, "/");
-    img.setAttribute("src", relFromMd);
-    // Kick off download sequentially to respect site
-    // eslint-disable-next-line no-await-in-loop
-    await downloadBinary(abs.toString(), imgAbsPath, config.userAgent);
+    // Point images to their absolute URL; do not download or store media locally
+    img.setAttribute("src", abs.toString());
   }
 
   for (const a of dom.querySelectorAll("a[href]")) {

@@ -10,6 +10,14 @@ async function createBrowser(): Promise<Browser> {
 async function preparePage(browser: Browser, config: ScrapeConfig): Promise<Page> {
   const context = await browser.newContext({ userAgent: config.userAgent });
   const page = await context.newPage();
+  // Block non-essential resources (media, images, fonts, stylesheets)
+  await page.route("**/*", (route) => {
+    const type = route.request().resourceType();
+    if (type === "image" || type === "media" || type === "font" || type === "stylesheet") {
+      return route.abort();
+    }
+    return route.continue();
+  });
   await page.emulateMedia({ media: "print" });
   return page;
 }
