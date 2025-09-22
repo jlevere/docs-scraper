@@ -54,7 +54,38 @@ jobs:
         with:
           name: docs
           path: ${{ inputs.out }}
+          include-hidden-files: true
 
+  release:
+    needs: scrape
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Compute date-based tag
+        id: meta
+        run: |
+          DATE_TAG=$(date -u +"%Y-%m-%d")
+          TAG="v${DATE_TAG}-r${GITHUB_RUN_NUMBER}"
+          NAME="Docs scrape ${DATE_TAG} (#${GITHUB_RUN_NUMBER})"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "archive=docs-${TAG}.tar.gz" >> "$GITHUB_OUTPUT"
+      - name: Download docs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs
+          path: docs
+      - name: Create archive
+        run: |
+          tar -czf "${{ steps.meta.outputs.archive }}" -C docs .
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.name }}
+          files: ${{ steps.meta.outputs.archive }}
+          generate_release_notes: true
         
 
 
