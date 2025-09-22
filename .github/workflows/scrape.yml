@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install Playwright browsers (CLI)
+        run: npx playwright install --with-deps chromium
+
       - name: Build
         run: pnpm build
 
